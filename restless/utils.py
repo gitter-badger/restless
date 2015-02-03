@@ -1,6 +1,12 @@
 import datetime
 import decimal
 import traceback
+try:
+    from django.conf import settings
+    from django.utils import timezone
+except ImportError:
+    settings = None
+    timezone = None
 
 try:
     import json
@@ -19,11 +25,36 @@ class MoreTypesJSONEncoder(json.JSONEncoder):
     """
     def default(self, data):
         if isinstance(data, (datetime.datetime, datetime.date, datetime.time)):
-            return data.isoformat()
+            return naive_datetime(data).isoformat()
         elif isinstance(data, decimal.Decimal):
             return str(data)
         else:
             return super(MoreTypesJSONEncoder, self).default(data)
+
+
+def naive_datetime(value):
+    if not settings or not timezone:
+        return value
+
+    if getattr(settings, "USE_TZ", False):
+        default_tz = timezone.get_default_timezone()
+
+        if isinstance(value, datetime.datetime) and timezone.is_aware(value):
+            return timezone.make_naive(value, default_tz)
+        elif isinstance(value, datetime.date):
+            value = timezone.make_naive(
+                datetime.datetime(value.year, value.month, value.day, tzinfo=timezone.UTC()),
+                default_tz)
+
+            return value.date()
+        elif isinstance(value, datetime.time):
+            value = timezone.make_naive(datetime.datetime(
+                2001, 1, 1, hour=value.hour, minute=value.minute, second=value.second,
+                microsecond=value.microsecond, tzinfo=timezone.UTC()), default_tz)
+
+            return value.time()
+
+    return value
 
 
 def format_traceback(exc_info):
