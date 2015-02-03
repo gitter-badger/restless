@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 class Preparer(object):
     """
     A plain preparation object which just passes through data.
@@ -51,11 +54,36 @@ class FieldsPreparer(Preparer):
         result = {}
 
         if not self.fields:
-            # No fields specified. Serialize everything.
             return data
 
         for fieldname, lookup in self.fields.items():
-            result[fieldname] = self.lookup_data(lookup, data)
+            # 允许lookup为FieldsPreparer实例
+            if isinstance(lookup, FieldsPreparer):
+                preparer = lookup
+
+                sub_data = None
+                if hasattr(data, fieldname):
+                    sub_data = getattr(data, fieldname)
+
+                if sub_data is not None:
+                    # 特殊处理数组
+                    if hasattr(sub_data, '__iter__'):
+                        sub_result = []
+                        for sd in sub_data:
+                            sub_result.append(preparer.prepare(sd))
+                    else:
+                        sub_result = preparer.prepare(sub_data)
+
+                    result[fieldname] = sub_result
+            else:
+                if lookup.endswith('?'):
+                    lookup = lookup[:-1]
+                    try:
+                        result[fieldname] = self.lookup_data(lookup, data)
+                    except AttributeError:
+                        pass
+                else:
+                    result[fieldname] = self.lookup_data(lookup, data)
 
         return result
 

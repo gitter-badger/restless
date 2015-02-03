@@ -69,6 +69,7 @@ class Resource(object):
             'DELETE': 'delete',
         }
     }
+    limit_per_page = 20
     preparer = Preparer()
     serializer = JSONSerializer()
 
@@ -404,6 +405,24 @@ class Resource(object):
         :returns: The serialized body
         :rtype: string
         """
+        if not hasattr(data, '__iter__'):
+            return ''
+
+        limit = int(self.request.GET.get('limit', self.limit_per_page))
+        offset = int(self.request.GET.get('offset', 0))
+        try:
+            count = data.count()
+        except (AttributeError, TypeError):
+            count = len(data)
+
+        self.request._paginator = {
+            'limit': limit,
+            'offset': offset,
+            'total_count': count,
+        }
+
+        data = data[offset:offset + limit]
+
         if data is None:
             return ''
 
@@ -472,7 +491,8 @@ class Resource(object):
         :rtype: dict
         """
         return {
-            "objects": data
+            'meta': self.request._paginator,
+            'objects': data,
         }
 
     def is_authenticated(self):
