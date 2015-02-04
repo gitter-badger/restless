@@ -1,10 +1,10 @@
 import six
 import sys
 
-from .constants import OK, CREATED, ACCEPTED, NO_CONTENT
+from .constants import OK, CREATED, ACCEPTED, NO_CONTENT, CUSTOM_APPLICATION_ERROR
 from .data import Data
-from .exceptions import MethodNotImplemented, Unauthorized
-from .preparers import Preparer, FieldsPreparer
+from .exceptions import MethodNotImplemented, HttpError, AccountUnauthorized
+from .preparers import Preparer
 from .serializers import JSONSerializer
 from .utils import format_traceback
 
@@ -212,6 +212,12 @@ class Resource(object):
             'error': six.text_type(err),
         }
 
+        if isinstance(err, HttpError) and err.code != CUSTOM_APPLICATION_ERROR:
+            data.update({
+                'code': err.code,
+                'resolution': err.resolution,
+            })
+
         if self.is_debug():
             # Add the traceback.
             data['traceback'] = format_traceback(sys.exc_info())
@@ -287,7 +293,7 @@ class Resource(object):
                 )
 
             if not self.is_authenticated():
-                raise Unauthorized()
+                raise AccountUnauthorized()
 
             self.data = self.deserialize(method, endpoint, self.request_body())
             view_method = getattr(self, self.http_methods[endpoint][method])
