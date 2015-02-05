@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 
-from .exceptions import NotFound
+from .exceptions import ObjectNotFound
 from .resources import Resource
 
 
@@ -39,7 +39,7 @@ class DjangoResource(Resource):
     def build_error(self, err):
         # A bit nicer behavior surrounding things that don't exist.
         if isinstance(err, (ObjectDoesNotExist, Http404)):
-            err = NotFound(msg=six.text_type(err))
+            err = ObjectNotFound(msg=six.text_type(err))
 
         return super(DjangoResource, self).build_error(err)
 
