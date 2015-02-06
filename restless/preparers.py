@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+try:
+    from django.db.models import QuerySet
+except ImportError:
+    QuerySet = None
 
 
 class Preparer(object):
@@ -87,6 +91,20 @@ class FieldsPreparer(Preparer):
 
         return result
 
+    def optimize_django_query(self, data):
+        if not QuerySet:
+            return data
+
+        if isinstance(data, QuerySet):
+            only_fields = []
+            for fieldname, lookup in self.fields.items():
+                if isinstance(lookup, FieldsPreparer):
+                    pass
+                else:
+                    model = data.model
+
+        return data
+
     def lookup_data(self, lookup, data):
         """
         Given a lookup string, attempts to descend through nested data looking for
@@ -135,6 +153,10 @@ class FieldsPreparer(Preparer):
         elif data is not None:
             # Assume it's an object.
             value = getattr(data, part)
+
+        # 支持方法或者函数的值的获取
+        if hasattr(value, '__call__'):
+            value = value()
 
         if not remaining_lookup:
             return value

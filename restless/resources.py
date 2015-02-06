@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import six
 import sys
 
@@ -415,17 +416,23 @@ class Resource(object):
             return ''
 
         limit = int(self.request.GET.get('limit', self.limit_per_page))
-        offset = int(self.request.GET.get('offset', 0))
-        try:
-            count = data.count()
-        except (AttributeError, TypeError):
-            count = len(data)
+        offset = int(self.request.GET.get('offset', -1))
 
         self.request._paginator = {
             'limit': limit,
-            'offset': offset,
-            'total_count': count,
+            'offset': offset > 0 and offset or 0,
         }
+
+        # 只有显式传offset参数的时候才返回总记录数
+        if offset >= 0:
+            try:
+                total = data.count()
+            except (AttributeError, TypeError):
+                total = len(data)
+
+            self.request._paginator.update({
+                'total': total,
+            })
 
         data = data[offset:offset + limit]
 

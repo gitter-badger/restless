@@ -35,11 +35,9 @@ class Video(models.Model):
     create_time = models.DateTimeField(_(u'创建时间'), auto_now_add=True)
     update_time = models.DateTimeField(_(u'更新时间'), auto_now=True)
 
-    @property
     def descr(self):
         return u'%s-%s' % (self.season, self.title)
 
-    @property
     def icon_url(self):
         return self.icon and self.icon.url or None
 

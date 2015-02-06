@@ -52,6 +52,7 @@ class VideoResource(DjangoResource):
         'likes': 'likes',
         'liked': 'liked?',
         'update_time': 'update_time',
+        # users 成为下一个preparer对应的数据节点
         'users': VideoLikedResource.preparer,
         'create_date': 'create_date?',
         'time': 'time?',
