@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 try:
-    from django.db.models import QuerySet
+    from django.db.models import QuerySet, FieldDoesNotExist
+    from django.db.models.fields.related import RelatedField
 except ImportError:
     QuerySet = None
+    FieldDoesNotExist = None
 
 
 class Preparer(object):
@@ -102,6 +104,16 @@ class FieldsPreparer(Preparer):
                     pass
                 else:
                     model = data.model
+                    keys = []
+                    for key in lookup.split('.'):
+                        try:
+                            field = model._meta.get_field_by_name(key)[0]
+                            keys.append(key)
+                            if isinstance(field, RelatedField):
+                                pass
+
+                        except FieldDoesNotExist:
+                            pass
 
         return data
 
