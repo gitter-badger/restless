@@ -93,30 +93,6 @@ class FieldsPreparer(Preparer):
 
         return result
 
-    def optimize_django_query(self, data):
-        if not QuerySet:
-            return data
-
-        if isinstance(data, QuerySet):
-            only_fields = []
-            for fieldname, lookup in self.fields.items():
-                if isinstance(lookup, FieldsPreparer):
-                    pass
-                else:
-                    model = data.model
-                    keys = []
-                    for key in lookup.split('.'):
-                        try:
-                            field = model._meta.get_field_by_name(key)[0]
-                            keys.append(key)
-                            if isinstance(field, RelatedField):
-                                pass
-
-                        except FieldDoesNotExist:
-                            pass
-
-        return data
-
     def lookup_data(self, lookup, data):
         """
         Given a lookup string, attempts to descend through nested data looking for
