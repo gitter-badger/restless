@@ -433,6 +433,8 @@ class Resource(object):
             self.request._paginator.update({
                 'total': total,
             })
+        else:
+            offset = 0
 
         data = data[offset:offset + limit]
 
