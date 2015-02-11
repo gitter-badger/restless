@@ -3,7 +3,8 @@ from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
 from django.contrib import admin
-from video.api import VideoResource, VideoLikedResource
+from video.resource.video import VideoResource
+from video.resource.video_liked import VideoLikedResource
 
 urlpatterns = patterns('',
                        url(r'^admin/', include(admin.site.urls)),
