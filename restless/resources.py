@@ -418,19 +418,24 @@ class Resource(object):
         limit = int(self.request.GET.get('limit', self.limit_per_page))
         offset = int(self.request.GET.get('offset', -1))
 
-        self.request._paginator = {
+        metadata = {
             'limit': limit,
             'offset': offset > 0 and offset or 0,
         }
 
+        if hasattr(self.request, '_metadata'):
+            self.request._metadata.update(metadata)
+        else:
+            self.request._metadata = metadata
+
         # 只有显式传offset参数的时候才返回总记录数
-        if offset >= 0:
+        if offset >= 0 and self.request._metadata.get('total', 0) == 0:
             try:
                 total = data.count()
             except (AttributeError, TypeError):
                 total = len(data)
 
-            self.request._paginator.update({
+            self.request._metadata.update({
                 'total': total,
             })
         else:
@@ -506,7 +511,7 @@ class Resource(object):
         :rtype: dict
         """
         return {
-            'meta': self.request._paginator,
+            'meta': self.request._metadata,
             'objects': data,
         }
 
