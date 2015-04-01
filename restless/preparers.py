@@ -135,7 +135,7 @@ class FieldsPreparer(Preparer):
         part = parts[0]
         remaining_lookup = '.'.join(parts[1:])
 
-        if hasattr(data, 'keys') and hasattr(data, '__getitem__'):
+        if hasattr(data, 'keys') and data.keys and hasattr(data, '__getitem__') and data.__getitem__:
             # Dictionary enough for us.
             value = data[part]
         elif data is not None:
@@ -143,7 +143,7 @@ class FieldsPreparer(Preparer):
             value = getattr(data, part)
 
         # 支持方法或者函数的值的获取
-        if hasattr(value, '__call__'):
+        if hasattr(value, '__call__') and value.__call__:
             value = value()
 
         if not remaining_lookup:
