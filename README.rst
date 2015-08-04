@@ -171,3 +171,8 @@ For Python 2:
     $ py.test -s -v --cov=restless --cov-report=html tests
 
 Coverage is at about 94%, so please don't make it worse. :D
+
+
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/pobear/restless
+   :target: https://gitter.im/pobear/restless?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
